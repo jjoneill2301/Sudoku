@@ -14,7 +14,7 @@ public class SudokuBoard {
             }
         }
         int startX = row - (row % 3); // Row we are on - mini length (i.e. [8 - (8 % 3)] -> 8 - 2 -> 6, AKA start of box 2
-        int startY = col - (col % 3); // same idea
+        int startY = col - (col % 3); // same idea; mod 3 always gets to the start of whatever subgrid you want
         // This loop checks any of the 9 "mini" grids within the sudoku puzzle.
         for (int x = 0; x < 3; x++) { // Checks validity by mini row
             for (int y = 0; y < 3; y++) { //Checks validity by mini col
@@ -23,6 +23,46 @@ public class SudokuBoard {
                 }
             }
         }
-        return true; // escape all tests
+        return true; // Pass all tests
+    }
+
+    // https://w.wiki/8Zj I just changed the JS implementation to Java, chatGPT told me about this bc I was stuck
+    static void mix(int[] nums) {
+        for (int i = nums.length - 1; i > 0; i--) {
+            final int j = (int) (Math.random() * (i +1)); // no Math.floor because casting to int is functionally the same and thus redundant
+            int variableParkingLot = nums[i]; // the end of the JS example is not as easy to do in Java
+            nums[i] = nums[j];
+            nums[j] = variableParkingLot;
+        }
+    }
+
+    static boolean fillGrid(int[][] grid) {
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                if(grid[row][col] == 0) { // remember, 0 means null so this loop takes advantage of that
+                    int[] nums = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // acceptable entries, zero not included!
+                    mix(nums);
+                    for (int num : nums) {
+                        if(validNum(grid,row,col,num)) { // Validate num and make sure it follows game rules
+                            grid[row][col] = num; // Slot in accepted number
+                            if (fillGrid(grid)) { // if we reached an acceptable number
+                                return true; // and can now exit early
+                            }
+                            grid[row][col] = 0; // did not pass prev if statement, so undo and try num above this one
+                        }
+                    }
+                    return false; // If nums[] array was contains no matches.
+                }
+            }
+        }
+        return true;
+    }
+
+    public int[][] getBoard() {
+        return board;
+    }
+
+    public void setBoard() {
+        fillGrid(board);
     }
 }
