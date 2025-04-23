@@ -1,7 +1,7 @@
 public class SudokuBoard {
     // Useful reference: https://www.geeksforgeeks.org/program-sudoku-generator/
-    private int[][] board = new int[9][9]; // 1-9 valid, index 0 means cell null
-    private String solutionCondensed = "";
+    private int[][] puzzleSolved = new int[9][9]; // 1-9 valid, index 0 means cell null
+    private String[][] puzzleUnsolved = new String[9][9]; // This one is a string for cells without a num
 
     static boolean validNum(int[][] grid, int row, int col, int num) {
         for (int iterableCol = 0; iterableCol < 9; iterableCol++) {
@@ -59,21 +59,24 @@ public class SudokuBoard {
         return true;
     }
 
-    public int[][] getBoard() {
-        return board;
+    public int[][] getPuzzleSolved() {
+        return puzzleSolved;
     }
 
     public void setBoard() {
-        fillGrid(board);
+        fillGrid(puzzleSolved);
     }
 
-    public void solutionToString() {
-        int[][] game = getBoard();
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) {
-                solutionCondensed += game[row][col];
+    public String[][] getPuzzleUnsolved(double difficulty) {
+        for (int row = 0; row < 9; row++) {     // For every entry in the 2d array
+            for (int col = 0; col < 9; col++) { // Get a rnd # between 0 and 0.99
+                double rnd = Math.random(); // Reciprocal twice makes it work really well for a 0-1 difficulty slider
+                double remove = 1 / (1/difficulty);
+                if (rnd <= remove) { // This means the closer to 1 the more chance for numbers to be skipped
+                    puzzleUnsolved[row][col] = String.valueOf(puzzleSolved[row][col]); // rather than erased
+                } else { puzzleUnsolved[row][col] = ""; }
             }
         }
-        //System.out.print(solutionCondensed);
+        return puzzleUnsolved;
     }
 }
