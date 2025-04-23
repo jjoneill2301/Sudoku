@@ -1,6 +1,7 @@
 public class SudokuBoard {
     // Useful reference: https://www.geeksforgeeks.org/program-sudoku-generator/
     private int[][] board = new int[9][9]; // 1-9 valid, index 0 means cell null
+    private String solutionCondensed = "";
 
     static boolean validNum(int[][] grid, int row, int col, int num) {
         for (int iterableCol = 0; iterableCol < 9; iterableCol++) {
@@ -64,5 +65,15 @@ public class SudokuBoard {
 
     public void setBoard() {
         fillGrid(board);
+    }
+
+    public void solutionToString() {
+        int[][] game = getBoard();
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) {
+                solutionCondensed += game[row][col];
+            }
+        }
+        //System.out.print(solutionCondensed);
     }
 }

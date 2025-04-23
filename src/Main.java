@@ -18,5 +18,6 @@ public class Main {
         SudokuBoard s = new SudokuBoard();
         s.setBoard();
         printGrid(s.getBoard());
+        s.solutionToString();
     }
 }
