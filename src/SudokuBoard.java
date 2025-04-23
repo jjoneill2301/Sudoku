@@ -79,4 +79,8 @@ public class SudokuBoard {
         }
         return puzzleUnsolved;
     }
+
+    public String getUnsolvedCell(int row, int col){
+        return puzzleUnsolved[row][col];
+    }
 }
