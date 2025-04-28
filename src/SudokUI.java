@@ -11,17 +11,18 @@ public class SudokUI {
         startPuzzle();
     }
 
-    @SuppressWarnings("unused") // unsolved and sudokuNumbers are necessary and are incorrectly labeled as unused
     private void startPuzzle() {
-        SudokuBoard sudokuBoard = new SudokuBoard();
-        sudokuBoard.setBoard();
-        String[][] unsolved = sudokuBoard.getPuzzleUnsolved(.6);
-        Object[] sudokuNumbers = new Object[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        SudokuBoardWithCells sudokuBoard = new SudokuBoardWithCells();
+        Cell[][] unsolvedBoard = sudokuBoard.getPuzzleUnsolved();
+
         sudokuPanel = new JPanel(null);
         sudokuGame = new JTable(9,9);
         for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
-            for (int col = 0; col < 9; col++) { // contained in the unsolved 2d Array
-                sudokuGame.setValueAt(sudokuBoard.getUnsolvedCell(row, col), row ,col);
+            for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
+                sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
+                if (unsolvedBoard[row][col].getValue() == 0) {
+                    sudokuGame.setValueAt("", row, col);// Display as ""
+                }
             }
         }
         designGame(sudokuGame);
