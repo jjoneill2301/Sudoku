@@ -2,11 +2,14 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.Border;
 import java.awt.*;
-
+import javax.swing.UIManager.*;
 public class SudokUI {
 
     private JPanel  sudokuPanel;
     private JTable  sudokuGame;
+    private JButton buttonEasy;
+    private JButton buttonMed;
+    private JButton buttonHard;
 
     private void createUIComponents() {
         startPuzzle();
@@ -27,6 +30,7 @@ public class SudokUI {
             }
         }
         designGame(sudokuGame);
+        designButtons(sudokuPanel);
     }
 
     private void designGame(JTable g) {
@@ -78,7 +82,38 @@ public class SudokUI {
         });
     }
 
+    private void designButtons(JPanel sudokuPanel) {
+        buttonEasy = new JButton("EASY");
+        buttonEasy.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        buttonEasy.setBounds(30,475, 100,65);
+
+        buttonMed = new JButton("MEDIUM");
+        buttonMed.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        buttonMed.setBounds(196, 475, 100, 65);
+
+        buttonHard = new JButton("HARD");
+        buttonHard.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        buttonHard.setBounds(362, 475, 100, 65);
+
+        sudokuPanel.add(buttonEasy);
+        sudokuPanel.add(buttonMed);
+        sudokuPanel.add(buttonHard);
+    }
+
+
+
     public static void main(String[] args) {
+        try { // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/nimbus.html
+            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                } // Makes my buttons look fancy
+            }
+        } catch (Exception e) {
+            // If Nimbus is not available, you can set the GUI to another look and feel.
+        }
+
         JFrame frame = new JFrame("SudokUI");
         frame.setContentPane(new SudokUI().sudokuPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
