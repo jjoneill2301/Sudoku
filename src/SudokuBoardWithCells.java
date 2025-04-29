@@ -25,7 +25,7 @@ public class SudokuBoardWithCells extends Cell {
         // Generate unsolved puzzle by removing x number of cells (they are set to zero, and later on zero is shown as "")
         // Currently x is a hardcoded placeholder, but eventually it will be preset numbers that will be passed
         // depending on the difficulty the player selects
-        removeCellsFromGrid(54); //placeholder
+        removeCellsFromGrid(49); //placeholder
     }
 
     public SudokuBoardWithCells() {
