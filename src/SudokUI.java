@@ -82,6 +82,8 @@ public class SudokUI {
         // ChatGPT helped me with custom GUI renderer here for thicker borders and centered text
         g.setShowGrid(false); // Disable default grid and gaps or else it will be ugly
         g.setIntercellSpacing(new Dimension(0,0));
+        g.setOpaque(true);
+        g.setBackground(Color.GRAY);
         // Applies thick borders every third row/col as well as around the entire board
         g.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
