@@ -21,11 +21,8 @@ public class SudokuBoardWithCells extends Cell {
             for (int col = 0; col < 9; col++) { // Copy every value from first board into second
                 puzzleUnsolved[row][col].setValue(puzzleSolved[row][col].getValue());
             }
-        } // TODO Make easy, medium, hard buttons that will set x automatically in SudokUI.java
-        // Generate unsolved puzzle by removing x number of cells (they are set to zero, and later on zero is shown as "")
-        // Currently x is a hardcoded placeholder, but eventually it will be preset numbers that will be passed
-        // depending on the difficulty the player selects
-        removeCellsFromGrid(0); //placeholder
+        }
+        removeCellsFromGrid(cellsToRemove); // cellsToRemove is 0 at start of program so first generation will be empty
     }
 
     public SudokuBoardWithCells() {
@@ -64,7 +61,7 @@ public class SudokuBoardWithCells extends Cell {
         return true;
     }
 
-    private void removeCellsFromGrid(int cellsToRemove) {
+    protected void removeCellsFromGrid(int cellsToRemove) {
         int cellsRemoved = 0; // Larger values remove more cells resulting in more difficult puzzles
         Random r = new Random();
         while (cellsRemoved < cellsToRemove) { // r.nextint goes from 0 to 8, but our JTable has those as bounds

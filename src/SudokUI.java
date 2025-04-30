@@ -21,16 +21,54 @@ public class SudokUI {
 
         sudokuPanel = new JPanel(null);
         sudokuGame = new JTable(9,9);
-        for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
-            for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
-                sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
-                if (unsolvedBoard[row][col].getValue() == 0) {
-                    sudokuGame.setValueAt("", row, col);// Display as ""
-                }
-            }
-        }
+
         designGame(sudokuGame);
         designButtons(sudokuPanel);
+
+        buttonEasy.addActionListener(_ -> {
+            buttonEasy.setVisible(false);
+            buttonMed.setVisible(false);
+            buttonHard.setVisible(false);
+            sudokuBoard.removeCellsFromGrid(33);// Easy puzzle generation
+            for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
+                for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
+                    sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
+                    if (unsolvedBoard[row][col].getValue() == 0) {
+                        sudokuGame.setValueAt("", row, col);// Display as ""
+                    }
+                }
+            }
+        });
+
+        buttonMed.addActionListener(_ -> {
+            buttonEasy.setVisible(false);
+            buttonMed.setVisible(false);
+            buttonHard.setVisible(false);
+            sudokuBoard.removeCellsFromGrid(44);// Medium puzzle generation
+            for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
+                for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
+                    sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
+                    if (unsolvedBoard[row][col].getValue() == 0) {
+                        sudokuGame.setValueAt("", row, col);// Display as ""
+                    }
+                }
+            }
+        });
+
+        buttonHard.addActionListener(_ -> {
+            buttonEasy.setVisible(false);
+            buttonMed.setVisible(false);
+            buttonHard.setVisible(false);
+            sudokuBoard.removeCellsFromGrid(55);// Hard puzzle generation
+            for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
+                for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
+                    sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
+                    if (unsolvedBoard[row][col].getValue() == 0) {
+                        sudokuGame.setValueAt("", row, col);// Display as ""
+                    }
+                }
+            }
+        });
     }
 
     private void designGame(JTable g) {
@@ -108,7 +146,7 @@ public class SudokUI {
                 if ("Nimbus".equals(info.getName())) {
                     UIManager.setLookAndFeel(info.getClassName());
                     break;
-                } // Makes my buttons look fancy
+                } // Makes my buttons look fancy :)
             }
         } catch (Exception e) {
             // If Nimbus is not available, you can set the GUI to another look and feel.
