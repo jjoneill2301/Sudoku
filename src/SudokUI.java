@@ -13,6 +13,8 @@ public class SudokUI {
 
     private void createUIComponents() {
         startPuzzle();
+        sudokuPanel.setOpaque(true);
+        sudokuPanel.setBackground(Color.BLACK);
     }
 
     private void startPuzzle() {
@@ -75,6 +77,7 @@ public class SudokUI {
         g.setBounds(50, 50, 400, 500);
         g.setRowHeight(50);
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
+        g.setForeground(Color.WHITE); // White font
         g.setCellSelectionEnabled(false); // This prevents a multiselect rectangle being formed on drag.
         // ChatGPT helped me with custom GUI renderer here for thicker borders and centered text
         g.setShowGrid(false); // Disable default grid and gaps or else it will be ugly
@@ -87,6 +90,7 @@ public class SudokUI {
                                                            int row, int col) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
                 setHorizontalAlignment(SwingConstants.CENTER); // Center text within each cell
+                setBackground(Color.DARK_GRAY);
                 // Calculate border thickness
                 int top = (row == 0 ? 4 : 1);               // top and
                 int left = (col == 0 ? 4 : 1);              // left border
@@ -107,13 +111,15 @@ public class SudokUI {
                 JTextField editor = (JTextField) super.getTableCellEditorComponent(table, value,isSelected,row,col);
                 // Center text while editing
                 editor.setHorizontalAlignment(JTextField.CENTER);
-                // Copy and steal the border thickness code from above
-                int top = (row == 0 ? 4 : 1); // top and
-                int left = (col == 0 ? 4 : 1); // left border
-                int bottom = ((row % 3) == 2 ? 4 : 1); // every 3rd row
-                int right = ((col % 3) == 2 ? 4 : 1); // every 3rd col
+                editor.setBackground(Color.GRAY);
+                // Make each selected cell have thicker borders
+                int top = 2; // top and
+                int left = 2; // left border
+                int bottom = 2; // every 3rd row
+                int right = 2; // every 3rd col
                 // Match font to unedited font style
                 editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
+                editor.setForeground(Color.WHITE); // White font while editing
                 editor.setBorder(BorderFactory.createMatteBorder(top,left,bottom,right,Color.BLACK));
                 return editor;
             }
