@@ -2,7 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.Border;
 import java.awt.*;
-import javax.swing.UIManager.*;
+
 public class SudokUI {
 
     private JPanel  sudokuPanel;
@@ -23,9 +23,14 @@ public class SudokUI {
 
         sudokuPanel = new JPanel(null);
         sudokuGame = new JTable(9,9);
-
         designGame(sudokuGame);
-        designButtons(sudokuPanel);
+
+        buttonEasy = new JButton("EASY");
+        buttonMed  = new JButton("MEDIUM");
+        buttonHard = new JButton("HARD");
+        designButtons(buttonEasy, 30);
+        designButtons(buttonMed, 196);
+        designButtons(buttonHard,362);
 
         buttonEasy.addActionListener(_ -> {
             buttonEasy.setVisible(false);
@@ -82,7 +87,6 @@ public class SudokUI {
         // ChatGPT helped me with custom GUI renderer here for thicker borders and centered text
         g.setShowGrid(false); // Disable default grid and gaps or else it will be ugly
         g.setIntercellSpacing(new Dimension(0,0));
-        g.setOpaque(true);
         g.setBackground(Color.GRAY);
         // Applies thick borders every third row/col as well as around the entire board
         g.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -128,38 +132,21 @@ public class SudokUI {
         });
     }
 
-    private void designButtons(JPanel sudokuPanel) {
-        buttonEasy = new JButton("EASY");
-        buttonEasy.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
-        buttonEasy.setBounds(30,475, 100,65);
-
-        buttonMed = new JButton("MEDIUM");
-        buttonMed.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
-        buttonMed.setBounds(196, 475, 100, 65);
-
-        buttonHard = new JButton("HARD");
-        buttonHard.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
-        buttonHard.setBounds(362, 475, 100, 65);
-
-        sudokuPanel.add(buttonEasy);
-        sudokuPanel.add(buttonMed);
-        sudokuPanel.add(buttonHard);
+    private void designButtons(JButton difficulty, int x) {
+        // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/color.html
+        difficulty.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+        difficulty.setBounds(x,475, 100,65);
+        difficulty.setBackground(Color.DARK_GRAY);
+        difficulty.setForeground(Color.WHITE);
+        difficulty.setRolloverEnabled(false); // Disables color shifting when the mouse hovers over each button
+        difficulty.setBorderPainted(false); // Removes a very thin border that is off color and jarring
+        difficulty.setFocusPainted(false); // Removes a tiny rectangle around each button's text
+        sudokuPanel.add(difficulty);
     }
 
 
 
     public static void main(String[] args) {
-        try { // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/nimbus.html
-            for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                } // Makes my buttons look fancy :)
-            }
-        } catch (Exception e) {
-            // If Nimbus is not available, you can set the GUI to another look and feel.
-        }
-
         JFrame frame = new JFrame("SudokUI");
         frame.setContentPane(new SudokUI().sudokuPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
