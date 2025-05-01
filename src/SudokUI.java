@@ -2,8 +2,16 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class SudokUI {
+
+    private final Color DARKER  = new Color(3, 4, 94);
+    private final Color DARK   = new Color(0, 119, 182);
+    private final Color NEUTRAL  = new Color(0, 180, 216);
+    private final Color LIGHTER  = new Color(144, 224, 239);
+    private final Color LIGHTEST = new Color(202, 240, 248);
 
     private JPanel  sudokuPanel;
     private JTable  sudokuGame;
@@ -13,8 +21,6 @@ public class SudokUI {
 
     private void createUIComponents() {
         startPuzzle();
-        sudokuPanel.setOpaque(true);
-        sudokuPanel.setBackground(Color.BLACK);
     }
 
     private void startPuzzle() {
@@ -22,15 +28,17 @@ public class SudokUI {
         Cell[][] unsolvedBoard = sudokuBoard.getPuzzleUnsolved();
 
         sudokuPanel = new JPanel(null);
+        sudokuPanel.setOpaque(true);
+        sudokuPanel.setBackground(DARK);
         sudokuGame = new JTable(9,9);
         designGame(sudokuGame);
 
         buttonEasy = new JButton("EASY");
         buttonMed  = new JButton("MEDIUM");
         buttonHard = new JButton("HARD");
-        designButtons(buttonEasy, 30);
-        designButtons(buttonMed, 196);
-        designButtons(buttonHard,362);
+        designButtons(buttonEasy, 0);
+        designButtons(buttonMed, 161);
+        designButtons(buttonHard,322);
 
         buttonEasy.addActionListener(_ -> {
             buttonEasy.setVisible(false);
@@ -82,12 +90,11 @@ public class SudokUI {
         g.setBounds(50, 50, 400, 500);
         g.setRowHeight(50);
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
-        g.setForeground(Color.WHITE); // White font
         g.setCellSelectionEnabled(false); // This prevents a multiselect rectangle being formed on drag.
         // ChatGPT helped me with custom GUI renderer here for thicker borders and centered text
         g.setShowGrid(false); // Disable default grid and gaps or else it will be ugly
         g.setIntercellSpacing(new Dimension(0,0));
-        g.setBackground(Color.GRAY);
+        g.setBackground(DARK); // Area around buttons
         // Applies thick borders every third row/col as well as around the entire board
         g.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -96,13 +103,14 @@ public class SudokUI {
                                                            int row, int col) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
                 setHorizontalAlignment(SwingConstants.CENTER); // Center text within each cell
-                setBackground(Color.DARK_GRAY);
+                setBackground(DARK);
+                setForeground(LIGHTER);
                 // Calculate border thickness
                 int top = (row == 0 ? 4 : 1);               // top and
                 int left = (col == 0 ? 4 : 1);              // left border
                 int bottom = ((row % 3) == 2 ? 4 : 1);      // every 3rd row
                 int right = ((col % 3) == 2 ? 4 : 1);       // every 3rd col */
-                Border b = BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK);
+                Border b = BorderFactory.createMatteBorder(top, left, bottom, right, DARKER);
                 setBorder(b);
                 return this;
             }
@@ -115,32 +123,46 @@ public class SudokUI {
             public Component getTableCellEditorComponent(JTable table, Object value,
                                                          boolean isSelected, int row, int col) {
                 JTextField editor = (JTextField) super.getTableCellEditorComponent(table, value,isSelected,row,col);
-                // Center text while editing
                 editor.setHorizontalAlignment(JTextField.CENTER);
-                editor.setBackground(Color.GRAY);
-                // Make each selected cell have thicker borders
-                int top = 2; // top and
-                int left = 2; // left border
-                int bottom = 2; // every 3rd row
-                int right = 2; // every 3rd col
-                // Match font to unedited font style
+                editor.setBackground(DARK);
                 editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
-                editor.setForeground(Color.WHITE); // White font while editing
-                editor.setBorder(BorderFactory.createMatteBorder(top,left,bottom,right,Color.BLACK));
+                editor.setForeground(LIGHTER);
+                // Makes the cell currently being edited have slightly thicker borders
+                editor.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
                 return editor;
             }
         });
     }
 
     private void designButtons(JButton difficulty, int x) {
-        // https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/color.html
+        difficulty.setBounds(x,475, 160,65);
+        //difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
         difficulty.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
-        difficulty.setBounds(x,475, 100,65);
-        difficulty.setBackground(Color.DARK_GRAY);
-        difficulty.setForeground(Color.WHITE);
-        difficulty.setRolloverEnabled(false); // Disables color shifting when the mouse hovers over each button
-        difficulty.setBorderPainted(false); // Removes a very thin border that is off color and jarring
+        difficulty.setBackground(NEUTRAL);
+        difficulty.setForeground(LIGHTEST);
+        difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+
+//        difficulty.setRolloverEnabled(false); // Disables color shifting when the mouse hovers over each button
         difficulty.setFocusPainted(false); // Removes a tiny rectangle around each button's text
+        /* Google search: "mouselistener signature"           Google AI Overview:
+           public void mouseEntered(MouseEvent e): Invoked when the mouse enters a component.
+           public void mouseExited(MouseEvent e): Invoked when the mouse exits a component.                           */
+        difficulty.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) { // Hover events
+                difficulty.setBackground(NEUTRAL);
+                difficulty.setForeground(DARKER);
+                difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) { // Hover events
+                difficulty.setBackground(NEUTRAL);
+                difficulty.setForeground(LIGHTEST);
+                difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+            }
+        });
+
         sudokuPanel.add(difficulty);
     }
 
@@ -151,6 +173,8 @@ public class SudokUI {
         frame.setContentPane(new SudokUI().sudokuPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setBounds(800, 130, 500, 600);
+        frame.setBackground(new Color(3, 4, 94)); // DARKER
+        frame.setResizable(false);
         frame.setVisible(true);
     }
 }
