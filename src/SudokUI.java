@@ -2,6 +2,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -20,6 +22,7 @@ public class SudokUI {
     private JButton buttonHard;
 
     private JLabel[] labelArr;
+    private JLabel debug;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("SudokUI");
@@ -39,11 +42,13 @@ public class SudokUI {
         designButtons(buttonHard, 323);
 
         labelArr = new JLabel[9];
+        debug = new JLabel();
         for (int i = 0; i < labelArr.length; i++) {
             labelArr[i] = new JLabel(Integer.toString(i + 1), SwingConstants.CENTER);
         }
 
         designLabels(labelArr);
+        debugLabel(debug);
     }
 
     private void startPuzzle() {
@@ -52,6 +57,7 @@ public class SudokUI {
 
         sudokuPanel = new JPanel(null);
         sudokuPanel.setBackground(DARK);
+
         sudokuGame = new JTable(9, 9);
         designGame(sudokuGame);
 
@@ -68,11 +74,44 @@ public class SudokUI {
 
     private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int difficulty, JLabel[] labelArr) {
         sudokuBoard.removeCellsFromGrid(difficulty);// Hard puzzle generation
-        for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
+        for (int row = 0, i = 0; row < 9 && i < 9; row++, i++) { // Iterate through the table, setting the specific cell to the value
             for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
                 sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row, col);
                 if (unsolvedBoard[row][col].getValue() == 0) {
                     sudokuGame.setValueAt("", row, col);// Display as ""
+                }
+                System.out.println(sudokuBoard.returnCellTally(i));
+                switch (unsolvedBoard[row][col].getValue()) {
+                    case 0:
+                        sudokuGame.setValueAt("", row, col);
+                        break;
+                    case 1:
+                        sudokuBoard.incrementTally(0);
+                        break;
+                    case 2:
+                        sudokuBoard.incrementTally(1);
+                        break;
+                    case 3:
+                        sudokuBoard.incrementTally(2);
+                        break;
+                    case 4:
+                        sudokuBoard.incrementTally(3);
+                        break;
+                    case 5:
+                        sudokuBoard.incrementTally(4);
+                        break;
+                    case 6:
+                        sudokuBoard.incrementTally(5);
+                        break;
+                    case 7:
+                        sudokuBoard.incrementTally(6);
+                        break;
+                    case 8:
+                        sudokuBoard.incrementTally(7);
+                        break;
+                    case 9:
+                        sudokuBoard.incrementTally(8);
+                        break;
                 }
             }
         }
@@ -81,9 +120,20 @@ public class SudokUI {
         buttonMed.setVisible(false);
         buttonHard.setVisible(false);
 
+        debug.setVisible(true);
         for (JLabel num : labelArr) {
             num.setVisible(true);  // Show labels once buttons are gone
         }
+
+    }
+
+    private void debugLabel(JLabel d) {
+        d.setBounds(325, 450, 154, 50);
+        d.setVisible(false);
+        d.setBackground(new Color(0, 119, 182));
+        d.setForeground(new Color(3, 4, 94));
+        d.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
+        sudokuPanel.add(d);
     }
 
     private void designLabels(JLabel[] numberLabels) {
@@ -102,7 +152,8 @@ public class SudokUI {
                 x += 53;
             }
             i++;
-            sudokuPanel.add(num); //System.out.print(num.getBounds());
+            sudokuPanel.add(num);
+            System.out.print(num.getBounds() + "\n");
         }
     }
 
@@ -150,6 +201,15 @@ public class SudokUI {
                 editor.setForeground(LIGHTER);
                 editor.setSelectionColor(LIGHTEST);
                 editor.setSelectedTextColor(DARKER);
+                editor.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        char c = e.getKeyChar();
+                        if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) {
+                            e.consume(); // If user types into a cell anything other than
+                        }                // a number or backspace, ignore
+                    }                    // (AI helped me with this keyListener)
+                });
                 // Makes the cell currently being edited have slightly thicker borders
                 editor.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, LIGHTER));
                 return editor;
