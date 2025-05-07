@@ -1,26 +1,49 @@
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.Border;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class SudokUI {
 
-    private final Color DARKER  = new Color(3, 4, 94);
-    private final Color DARK   = new Color(0, 119, 182);
-    private final Color NEUTRAL  = new Color(0, 180, 216);
-    private final Color LIGHTER  = new Color(144, 224, 239);
+    private final Color DARKER = new Color(3, 4, 94);
+    private final Color DARK = new Color(0, 119, 182);
+    private final Color LIGHTER = new Color(144, 224, 239);
     private final Color LIGHTEST = new Color(202, 240, 248);
 
-    private JPanel  sudokuPanel;
-    private JTable  sudokuGame;
+    private JPanel sudokuPanel;
+    private JTable sudokuGame;
+
     private JButton buttonEasy;
     private JButton buttonMed;
     private JButton buttonHard;
 
+    private JLabel[] labelArr;
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("SudokUI");
+        frame.setContentPane(new SudokUI().sudokuPanel);
+        frame.setAlwaysOnTop(true); // For testing so it doesn't go away when clicking off panel
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setBounds(800, 130, 500, 600);
+        frame.setBackground(new Color(144, 224, 239)); // LIGHTER
+        frame.setResizable(false);
+        frame.setVisible(true);
+    }
+
     private void createUIComponents() {
         startPuzzle();
+        designButtons(buttonEasy, 0);
+        designButtons(buttonMed, 162);
+        designButtons(buttonHard, 323);
+
+        labelArr = new JLabel[9];
+        for (int i = 0; i < labelArr.length; i++) {
+            labelArr[i] = new JLabel(Integer.toString(i + 1), SwingConstants.CENTER);
+        }
+
+        designLabels(labelArr);
     }
 
     private void startPuzzle() {
@@ -28,62 +51,59 @@ public class SudokUI {
         Cell[][] unsolvedBoard = sudokuBoard.getPuzzleUnsolved();
 
         sudokuPanel = new JPanel(null);
-        sudokuPanel.setOpaque(true);
         sudokuPanel.setBackground(DARK);
-        sudokuGame = new JTable(9,9);
+        sudokuGame = new JTable(9, 9);
         designGame(sudokuGame);
 
         buttonEasy = new JButton("EASY");
-        buttonMed  = new JButton("MEDIUM");
+        buttonMed = new JButton("MEDIUM");
         buttonHard = new JButton("HARD");
-        designButtons(buttonEasy, 0);
-        designButtons(buttonMed, 161);
-        designButtons(buttonHard,322);
 
-        buttonEasy.addActionListener(_ -> {
-            buttonEasy.setVisible(false);
-            buttonMed.setVisible(false);
-            buttonHard.setVisible(false);
-            sudokuBoard.removeCellsFromGrid(33);// Easy puzzle generation
-            for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
-                for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
-                    sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
-                    if (unsolvedBoard[row][col].getValue() == 0) {
-                        sudokuGame.setValueAt("", row, col);// Display as ""
-                    }
+        buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr));
+
+        buttonMed.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr));
+
+        buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr));
+    }
+
+    private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int difficulty, JLabel[] labelArr) {
+        sudokuBoard.removeCellsFromGrid(difficulty);// Hard puzzle generation
+        for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
+            for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
+                sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row, col);
+                if (unsolvedBoard[row][col].getValue() == 0) {
+                    sudokuGame.setValueAt("", row, col);// Display as ""
                 }
             }
-        });
+        }
 
-        buttonMed.addActionListener(_ -> {
-            buttonEasy.setVisible(false);
-            buttonMed.setVisible(false);
-            buttonHard.setVisible(false);
-            sudokuBoard.removeCellsFromGrid(44);// Medium puzzle generation
-            for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
-                for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
-                    sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
-                    if (unsolvedBoard[row][col].getValue() == 0) {
-                        sudokuGame.setValueAt("", row, col);// Display as ""
-                    }
-                }
-            }
-        });
+        buttonEasy.setVisible(false);   // Remove buttons to make space for info
+        buttonMed.setVisible(false);
+        buttonHard.setVisible(false);
 
-        buttonHard.addActionListener(_ -> {
-            buttonEasy.setVisible(false);
-            buttonMed.setVisible(false);
-            buttonHard.setVisible(false);
-            sudokuBoard.removeCellsFromGrid(55);// Hard puzzle generation
-            for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
-                for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
-                    sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row ,col);
-                    if (unsolvedBoard[row][col].getValue() == 0) {
-                        sudokuGame.setValueAt("", row, col);// Display as ""
-                    }
-                }
+        for (JLabel num : labelArr) {
+            num.setVisible(true);  // Show labels once buttons are gone
+        }
+    }
+
+    private void designLabels(JLabel[] numberLabels) {
+        int x = 3;
+        int i = 0;
+        for (JLabel num : numberLabels) {
+            num.setVisible(false);
+            num.setBounds(x, 506, 50, 50);
+            num.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
+            num.setBackground(new Color(0, 119, 182));
+            num.setForeground(new Color(3, 4, 94));
+            num.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
+            if (i == 2 || i == 5) {  // This matches the spacing of the 2 vertical subgrid dividers
+                x += 55;
+            } else {
+                x += 53;
             }
-        });
+            i++;
+            sudokuPanel.add(num); //System.out.print(num.getBounds());
+        }
     }
 
     private void designGame(JTable g) {
@@ -93,7 +113,7 @@ public class SudokUI {
         g.setCellSelectionEnabled(false); // This prevents a multiselect rectangle being formed on drag.
         // ChatGPT helped me with custom GUI renderer here for thicker borders and centered text
         g.setShowGrid(false); // Disable default grid and gaps or else it will be ugly
-        g.setIntercellSpacing(new Dimension(0,0));
+//        g.setIntercellSpacing(new Dimension(0,0));
         g.setBackground(DARK); // Area around buttons
         // Applies thick borders every third row/col as well as around the entire board
         g.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
@@ -102,7 +122,7 @@ public class SudokUI {
                                                            boolean isSelected, boolean hasFocus,
                                                            int row, int col) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-                setHorizontalAlignment(SwingConstants.CENTER); // Center text within each cell
+                setHorizontalAlignment(0); // Center text within each cell
                 setBackground(DARK);
                 setForeground(LIGHTER);
                 // Calculate border thickness
@@ -110,7 +130,7 @@ public class SudokUI {
                 int left = (col == 0 ? 4 : 1);              // left border
                 int bottom = ((row % 3) == 2 ? 4 : 1);      // every 3rd row
                 int right = ((col % 3) == 2 ? 4 : 1);       // every 3rd col */
-                Border b = BorderFactory.createMatteBorder(top, left, bottom, right, DARKER);
+                Border b = BorderFactory.createMatteBorder(top, left, bottom, right, LIGHTER);
                 setBorder(b);
                 return this;
             }
@@ -122,27 +142,27 @@ public class SudokUI {
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value,
                                                          boolean isSelected, int row, int col) {
-                JTextField editor = (JTextField) super.getTableCellEditorComponent(table, value,isSelected,row,col);
-                editor.setHorizontalAlignment(JTextField.CENTER);
+                JTextField editor = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, col);
+                editor.setHorizontalAlignment(0);
                 editor.setBackground(DARK);
                 editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
+                editor.setCaretColor(LIGHTER); // blinking | will match text color
                 editor.setForeground(LIGHTER);
+                editor.setSelectionColor(LIGHTEST);
+                editor.setSelectedTextColor(DARKER);
                 // Makes the cell currently being edited have slightly thicker borders
-                editor.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+                editor.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, LIGHTER));
                 return editor;
             }
         });
     }
 
     private void designButtons(JButton difficulty, int x) {
-        difficulty.setBounds(x,475, 160,65);
-        //difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+        difficulty.setBounds(x, 475, 160, 65);
         difficulty.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
-        difficulty.setBackground(NEUTRAL);
-        difficulty.setForeground(LIGHTEST);
-        difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
-
-//        difficulty.setRolloverEnabled(false); // Disables color shifting when the mouse hovers over each button
+        difficulty.setBackground(new Color(0, 119, 182));
+        difficulty.setForeground(new Color(144, 224, 239));
+        difficulty.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(144, 224, 239)));
         difficulty.setFocusPainted(false); // Removes a tiny rectangle around each button's text
         /* Google search: "mouselistener signature"           Google AI Overview:
            public void mouseEntered(MouseEvent e): Invoked when the mouse enters a component.
@@ -150,31 +170,18 @@ public class SudokUI {
         difficulty.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) { // Hover events
-                difficulty.setBackground(NEUTRAL);
+                difficulty.setBackground(DARK);
                 difficulty.setForeground(DARKER);
-                difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+                difficulty.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, DARKER));
             }
 
             @Override
             public void mouseExited(MouseEvent e) { // Hover events
-                difficulty.setBackground(NEUTRAL);
+                difficulty.setBackground(DARK);
                 difficulty.setForeground(LIGHTEST);
-                difficulty.setBorder(BorderFactory.createMatteBorder(2,2,2,2,DARKER));
+                difficulty.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, LIGHTER));
             }
         });
-
         sudokuPanel.add(difficulty);
-    }
-
-
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("SudokUI");
-        frame.setContentPane(new SudokUI().sudokuPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBounds(800, 130, 500, 600);
-        frame.setBackground(new Color(3, 4, 94)); // DARKER
-        frame.setResizable(false);
-        frame.setVisible(true);
     }
 }
