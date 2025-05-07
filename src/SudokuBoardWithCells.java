@@ -1,29 +1,10 @@
 import java.util.Random;
+
 public class SudokuBoardWithCells extends Cell {
-    private Cell[][] puzzleSolved = new Cell[9][9];    // 2d array of Cell objects for the finished puzzle
-    private Cell[][] puzzleUnsolved = new Cell[9][9];  // 2d array of Cell objects for the puzzle
-    private int cellsToRemove = 0; // Will control difficulty
+    private final Cell[][] puzzleSolved = new Cell[9][9];    // 2d array of Cell objects for the finished puzzle
+    private final Cell[][] puzzleUnsolved = new Cell[9][9];  // 2d array of Cell objects for the puzzle
 
-    // Getters for main
-    public Cell[][] getPuzzleSolved() {
-        return puzzleSolved;
-    }
-
-    public Cell[][] getPuzzleUnsolved() {
-        return puzzleUnsolved;
-    }
-
-    // Generate a solved sudoku as well as its corresponding unsolved state by removing cells from the solved board
-    public void generateBoard() {
-        fillGridWithCells(puzzleSolved);
-        // Loop through the entire grid
-        for (int row = 0; row < 9; row++) {
-            for (int col = 0; col < 9; col++) { // Copy every value from first board into second
-                puzzleUnsolved[row][col].setValue(puzzleSolved[row][col].getValue());
-            }
-        }
-        removeCellsFromGrid(cellsToRemove); // cellsToRemove is 0 at start of program so first generation will be empty
-    }
+    private final int[] perCellTally = new int[9]; // 0 unused
 
     public SudokuBoardWithCells() {
         super(0, 0); // Constructor from super. Necessary or compiler will not like it
@@ -61,6 +42,40 @@ public class SudokuBoardWithCells extends Cell {
         return true;
     }
 
+    // Copy and pasted from SudokuBoard.java and renamed variable
+    // Uses the Fisher-Yates shuffle algorithm to mix the nums array in the fillGridWithCells method
+    private static void mix(int[] nums) { // https://w.wiki/8Zj
+        for (int i = nums.length - 1; i > 0; i--) {
+            final int j = (int) (Math.random() * (i + 1));
+            int k = nums[i];
+            nums[i] = nums[j];
+            nums[j] = k; // Use temp variable k to change indices of numbers
+        }
+    }
+
+    public void incrementTally(int i) {
+        perCellTally[i]++;
+    }
+
+    public String returnCellTally(int i) {
+        return perCellTally[i] + "from Cell" + i;
+    }
+
+    public Cell[][] getPuzzleUnsolved() {
+        return puzzleUnsolved;
+    }
+
+    // Generate a solved sudoku as well as its corresponding unsolved state by removing cells from the solved board
+    public void generateBoard() {
+        fillGridWithCells(puzzleSolved);
+        // Loop through the entire grid
+        for (int row = 0; row < 9; row++) {
+            for (int col = 0; col < 9; col++) { // Copy every value from first board into second
+                puzzleUnsolved[row][col].setValue(puzzleSolved[row][col].getValue());
+            }
+        }
+    }
+
     protected void removeCellsFromGrid(int cellsToRemove) {
         int cellsRemoved = 0; // Larger values remove more cells resulting in more difficult puzzles
         Random r = new Random();
@@ -71,17 +86,6 @@ public class SudokuBoardWithCells extends Cell {
                 puzzleUnsolved[row][col].setValue(0);       // Later in main, this will be shown as an empty string in
                 cellsRemoved++; // Increment counter        // the cell rather than a 0.
             }
-        }
-    }
-
-    // Copy and pasted from SudokuBoard.java and renamed variable
-    // Uses the Fisher-Yates shuffle algorithm to mix the nums array in the fillGridWithCells method
-    private static void mix(int[] nums) { // https://w.wiki/8Zj
-        for (int i = nums.length - 1; i > 0; i--) {
-            final int j = (int) (Math.random() * (i + 1));
-            int k = nums[i];
-            nums[i] = nums[j];
-            nums[j] = k; // Use temp variable k to change indices of numbers
         }
     }
 }
