@@ -40,44 +40,12 @@ public class SudokUI {
     private void startPuzzle() {
         SudokuBoardWithCells sudokuBoard = new SudokuBoardWithCells();
         Cell[][] unsolvedBoard = sudokuBoard.getPuzzleUnsolved();
-
-        sudokuPanel = new JPanel(null);
-        sudokuPanel.setBackground(DARK);
-
-        sudokuGame = new JTable(9, 9);
-        designGame(sudokuGame, sudokuBoard);
-
+        initGame(sudokuBoard);
         initButtons();
         initLabels();
-
         buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr, labelTimer, labelDifficulty, "Easy"));
         buttonMed.addActionListener( _ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr, labelTimer, labelDifficulty, "Medium"));
         buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr, labelTimer, labelDifficulty, "Hard"));
-    }
-
-    private void initButtons() {
-        buttonEasy = new JButton("EASY");
-        buttonMed = new JButton("MEDIUM");
-        buttonHard = new JButton("HARD");
-        designButtons(buttonEasy, 0);
-        designButtons(buttonMed, 162);
-        designButtons(buttonHard, 323);
-    }
-
-    private void initLabels() {
-        labelArr = new JLabel[9];
-        labelTimer = new JLabel("Time Elapsed 00:00", SwingConstants.CENTER);
-        labelDifficulty = new JLabel("", SwingConstants.CENTER);
-
-        // Instantiate labels within the label array via an indexed loop, and then call design methods on final iteration
-        for (int i = 0; i < labelArr.length; i++) {
-            labelArr[i] = new JLabel(Integer.toString(i + 1), SwingConstants.CENTER);
-            if(i == labelArr.length - 1) {
-                designDifficulty(labelDifficulty); // Apply all design methods at last index so all are called once
-                designTimer(labelTimer);
-                designLabels(labelArr);
-            }
-        }
     }
 
     private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int intDifficulty, JLabel[] labelA, JLabel labelT, JLabel labelD, String strDifficulty) {
@@ -110,7 +78,7 @@ public class SudokUI {
                  labelD.setVisible(true); // For non array labels, just call once
                  labelD.setText("Playing: " + strDifficulty);
                  labelT.setVisible(true);
-                 startTimer(labelT);
+                 initTimer(labelT);
              }
         }
     }
@@ -125,7 +93,17 @@ public class SudokUI {
         sudokuPanel.add(d);
     }
 
-    private void startTimer(JLabel labelTimer) {
+    private void designTimer(JLabel t) {
+        t.setBounds(3, 450, 237, 50);
+        t.setVisible(false);
+        t.setFont(new Font(Font.SERIF, Font.BOLD, 24));
+        t.setBackground(new Color(0, 119, 182));
+        t.setForeground(new Color(3, 4, 94));
+        t.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
+        sudokuPanel.add(t);
+    }
+
+    private void initTimer(JLabel labelTimer) {
         final long START = System.currentTimeMillis();
         Timer t = new Timer(1000, _ -> {
             long elapsed = System.currentTimeMillis() - START;
@@ -135,16 +113,6 @@ public class SudokUI {
             labelTimer.setText("Time Elapsed - " + String.format("%02d:%02d", minutes, seconds));
         });
         t.start();
-    }
-
-    private void designTimer(JLabel t) {
-        t.setBounds(3, 450, 237, 50);
-        t.setVisible(false);
-        t.setFont(new Font(Font.SERIF, Font.BOLD, 24));
-        t.setBackground(new Color(0, 119, 182));
-        t.setForeground(new Color(3, 4, 94));
-        t.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
-        sudokuPanel.add(t);
     }
 
     private void designLabels(JLabel[] numberLabels) {
@@ -164,6 +132,22 @@ public class SudokUI {
             }
             i++; // move along
             sudokuPanel.add(num);
+        }
+    }
+
+    private void initLabels() {
+        labelArr = new JLabel[9];
+        labelTimer = new JLabel("Time Elapsed 00:00", SwingConstants.CENTER);
+        labelDifficulty = new JLabel("", SwingConstants.CENTER);
+
+        // Instantiate labels within the label array via an indexed loop, and then call design methods on final iteration
+        for (int i = 0; i < labelArr.length; i++) {
+            labelArr[i] = new JLabel(Integer.toString(i + 1), SwingConstants.CENTER);
+            if(i == labelArr.length - 1) {
+                designDifficulty(labelDifficulty); // Apply all design methods at last index so all are called once
+                designTimer(labelTimer);
+                designLabels(labelArr);
+            }
         }
     }
 
@@ -263,6 +247,13 @@ public class SudokUI {
         });
     }
 
+    private void initGame(SudokuBoardWithCells sB) {
+        sudokuPanel = new JPanel(null);
+        sudokuPanel.setBackground(DARK);
+
+        sudokuGame = new JTable(9, 9);
+        designGame(sudokuGame, sB);
+    }
     private void designButtons(JButton difficulty, int x) {
         difficulty.setBounds(x, 475, 160, 65);
         difficulty.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));
@@ -286,5 +277,14 @@ public class SudokUI {
             }
         });
         sudokuPanel.add(difficulty);
+    }
+
+    private void initButtons() {
+        buttonEasy = new JButton("EASY");
+        buttonMed = new JButton("MEDIUM");
+        buttonHard = new JButton("HARD");
+        designButtons(buttonEasy, 0);
+        designButtons(buttonMed, 162);
+        designButtons(buttonHard, 323);
     }
 }
