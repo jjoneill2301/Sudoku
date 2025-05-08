@@ -242,10 +242,18 @@ public class SudokUI {
                 // If the user clears a cell value that had info in it:
                 if (!cellOldValue.isEmpty() && cellNewValue.isEmpty()) {
                     sudokuBoard.decrementTally(Integer.parseInt(cellOldValue)-1);//-1's adjust index
-                    System.out.println("decrement fired");
+                    labelArr[Integer.parseInt(cellOldValue)-1].setOpaque(false);
+                    labelArr[Integer.parseInt(cellOldValue)-1].setBackground(DARK); //b/fground seem redundant
+                    labelArr[Integer.parseInt(cellOldValue)-1].setForeground(LIGHTER); // but setting opacity
+                    System.out.println("decrement fired");                          // on its own does nothing
                 // If the user enters a value into an empty cell:
                 } else if (cellOldValue.isEmpty() && !cellNewValue.isEmpty()) {
                     sudokuBoard.incrementTally(Integer.parseInt(cellNewValue)-1);
+                    if(sudokuBoard.returnCellTally(Integer.parseInt(cellNewValue)-1) == 9) {
+                        labelArr[Integer.parseInt(cellNewValue)-1].setOpaque(true);
+//                        labelArr[Integer.parseInt(cellNewValue)-1].setBackground(DARK);
+//                        labelArr[Integer.parseInt(cellNewValue)-1].setForeground(LIGHTER);
+                    }
                     System.out.println("increment fired");
                 }
                 // returns new method to editor
