@@ -20,7 +20,8 @@ public class SudokUI {
     private JButton buttonHard;
 
     private JLabel[] labelArr;
-    private JLabel debug;
+    private JLabel labelTimer;
+    private JLabel labelDifficulty;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("SudokUI");
@@ -34,18 +35,6 @@ public class SudokUI {
 
     private void createUIComponents() {
         startPuzzle();
-        designButtons(buttonEasy, 0);
-        designButtons(buttonMed, 162);
-        designButtons(buttonHard, 323);
-
-        labelArr = new JLabel[9];
-        debug = new JLabel();
-        for (int i = 0; i < labelArr.length; i++) {
-            labelArr[i] = new JLabel(Integer.toString(i + 1), SwingConstants.CENTER);
-        }
-
-        designLabels(labelArr);
-        debugLabel(debug);
     }
 
     private void startPuzzle() {
@@ -58,20 +47,32 @@ public class SudokUI {
         sudokuGame = new JTable(9, 9);
         designGame(sudokuGame, sudokuBoard);
 
-        buttonEasy = new JButton("EASY");
-        buttonMed = new JButton("MEDIUM");
-        buttonHard = new JButton("HARD");
+        buttonEasy = new JButton("EASY");   designButtons(buttonEasy, 0);
+        buttonMed = new JButton("MEDIUM");  designButtons(buttonMed, 162);
+        buttonHard = new JButton("HARD");   designButtons(buttonHard, 323);
 
-        buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr));
+        labelArr = new JLabel[9];
+        labelTimer = new JLabel("Time Elapsed 00:00", SwingConstants.CENTER);
+        labelDifficulty = new JLabel("", SwingConstants.CENTER);
 
-        buttonMed.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr));
+        // Instantiate labels within the label array via an indexed loop, and then call design methods on final iteration
+        for (int i = 0; i < labelArr.length; i++) {
+            labelArr[i] = new JLabel(Integer.toString(i + 1), SwingConstants.CENTER);
+            if(i == labelArr.length - 1) {
+                designDifficulty(labelDifficulty); // Apply all design methods at last index so all are called once
+                designTimer(labelTimer);
+                designLabels(labelArr);
+            }
+        }
 
-        buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr));
+        buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr, labelTimer, labelDifficulty, "Easy"));
+        buttonMed.addActionListener( _ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr, labelTimer, labelDifficulty, "Medium"));
+        buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr, labelTimer, labelDifficulty, "Hard"));
     }
 
-    private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int difficulty, JLabel[] labelArr) {
-        sudokuBoard.removeCellsFromGrid(difficulty);
-        for (int row = 0; row < 9; row++) {             // Iterate through the table, setting the specific cell to the
+    private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int intDifficulty, JLabel[] labelA, JLabel labelT, JLabel labelD, String strDifficulty) {
+        sudokuBoard.removeCellsFromGrid(intDifficulty);
+        for (int row = 0; row < 9; row++) {             //  Iterate through the table, setting the specific cell to the
             for (int col = 0; col < 9; col++) {         // value contained in the solved sudokuBoard at point [row,col]
                 sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row, col);
                 switch (unsolvedBoard[row][col].getValue()) {
@@ -93,20 +94,47 @@ public class SudokUI {
         buttonMed.setVisible(false);
         buttonHard.setVisible(false);
 
-        debug.setVisible(true);
-        for (JLabel num : labelArr) {
-            num.setVisible(true);       // Show buttons once buttons have been hidden
+        for (int i = 0; i < labelA.length; i++) {
+             labelA[i].setVisible(true); // Now that buttons are hidden set info visible
+             if (i == labelA.length - 1) {
+                 labelD.setVisible(true); // For non array labels, just call once
+                 labelD.setText("Playing: " + strDifficulty);
+                 labelT.setVisible(true);
+                 startTimer(labelT);
+             }
         }
-
     }
 
-    private void debugLabel(JLabel d) {
-        d.setBounds(325, 450, 154, 50);
+    private void designDifficulty(JLabel d) {
+        d.setBounds(243, 450, 237, 50);
         d.setVisible(false);
-        d.setBackground(new Color(0, 119, 182));
+        d.setFont(new Font(Font.SERIF, Font.BOLD, 24));
+        d.setBackground(new Color(0, 119, 182)); //
         d.setForeground(new Color(3, 4, 94));
         d.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
         sudokuPanel.add(d);
+    }
+
+    private void startTimer(JLabel labelTimer) {
+        final long START = System.currentTimeMillis();
+        Timer t = new Timer(1000, _ -> {
+            long elapsed = System.currentTimeMillis() - START;
+            int seconds = (int) (elapsed/1000);
+            int minutes = (seconds/60);
+            seconds %= 60;
+            labelTimer.setText("Time Elapsed - " + String.format("%02d:%02d", minutes, seconds));
+        });
+        t.start();
+    }
+
+    private void designTimer(JLabel t) {
+        t.setBounds(3, 450, 237, 50);
+        t.setVisible(false);
+        t.setFont(new Font(Font.SERIF, Font.BOLD, 24));
+        t.setBackground(new Color(0, 119, 182));
+        t.setForeground(new Color(3, 4, 94));
+        t.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
+        sudokuPanel.add(t);
     }
 
     private void designLabels(JLabel[] numberLabels) {
@@ -156,13 +184,13 @@ public class SudokUI {
                 return this;
             }
         });
+
         g.setDefaultEditor(Object.class, new DefaultCellEditor(new JTextField()) {
             String cellOldValue = "";
 
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value,
                                                          boolean isSelected, int row, int col) {
-
                 cellOldValue = Objects.toString(value, ""); // cell is either a num or blank
                 JTextField editor = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, col);
 
@@ -231,9 +259,7 @@ public class SudokUI {
         difficulty.setBackground(new Color(0, 119, 182));
         difficulty.setForeground(new Color(144, 224, 239));
         difficulty.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(144, 224, 239)));
-        difficulty.setFocusPainted(false); // Removes a tiny rectangle around each button's text
-        /* public void mouseEntered(MouseEvent e): Invoked when the mouse enters a component.
-           public void mouseExited(MouseEvent e): Invoked when the mouse exits a component.  */
+        difficulty.setFocusPainted(false);
         difficulty.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) { // Hover events
