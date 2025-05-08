@@ -2,10 +2,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 public class SudokUI {
 
@@ -59,7 +56,7 @@ public class SudokUI {
         sudokuPanel.setBackground(DARK);
 
         sudokuGame = new JTable(9, 9);
-        designGame(sudokuGame);
+        designGame(sudokuGame, sudokuBoard);
 
         buttonEasy = new JButton("EASY");
         buttonMed = new JButton("MEDIUM");
@@ -74,17 +71,13 @@ public class SudokUI {
 
     private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int difficulty, JLabel[] labelArr) {
         sudokuBoard.removeCellsFromGrid(difficulty);// Hard puzzle generation
-        for (int row = 0, i = 0; row < 9 && i < 9; row++, i++) { // Iterate through the table, setting the specific cell to the value
+        for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
             for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
                 sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row, col);
                 if (unsolvedBoard[row][col].getValue() == 0) {
                     sudokuGame.setValueAt("", row, col);// Display as ""
                 }
-                System.out.println(sudokuBoard.returnCellTally(i));
                 switch (unsolvedBoard[row][col].getValue()) {
-                    case 0:
-                        sudokuGame.setValueAt("", row, col);
-                        break;
                     case 1:
                         sudokuBoard.incrementTally(0);
                         break;
@@ -116,6 +109,15 @@ public class SudokUI {
             }
         }
 
+        System.out.println("1's "+sudokuBoard.returnCellTally(0));
+        System.out.println("2's "+sudokuBoard.returnCellTally(1));
+        System.out.println("3's "+sudokuBoard.returnCellTally(2));
+        System.out.println("4's "+sudokuBoard.returnCellTally(3));
+        System.out.println("5's "+sudokuBoard.returnCellTally(4));
+        System.out.println("6's "+sudokuBoard.returnCellTally(5));
+        System.out.println("7's "+sudokuBoard.returnCellTally(6));
+        System.out.println("8's "+sudokuBoard.returnCellTally(7));
+        System.out.println("9's "+sudokuBoard.returnCellTally(8));
         buttonEasy.setVisible(false);   // Remove buttons to make space for info
         buttonMed.setVisible(false);
         buttonHard.setVisible(false);
@@ -153,11 +155,10 @@ public class SudokUI {
             }
             i++;
             sudokuPanel.add(num);
-            System.out.print(num.getBounds() + "\n");
         }
     }
 
-    private void designGame(JTable g) {
+    private void designGame(JTable g, SudokuBoardWithCells sudokuBoard) {
         g.setBounds(50, 50, 400, 500);
         g.setRowHeight(50);
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
@@ -201,14 +202,24 @@ public class SudokUI {
                 editor.setForeground(LIGHTER);
                 editor.setSelectionColor(LIGHTEST);
                 editor.setSelectedTextColor(DARKER);
-                editor.addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyTyped(KeyEvent e) {
+                editor.setFocusable(true);
+
+                for (KeyListener kl : editor.getKeyListeners()) {
+                    editor.removeKeyListener(kl); // Without this, the incrementer fires repeatedly
+                }
+                editor.addKeyListener(new KeyAdapter() {    // If user types into a cell anything other than
+                    @Override                               // a number or backspace, ignore
+                    public void keyTyped(KeyEvent e) {      // (AI helped me with this keyListener)
                         char c = e.getKeyChar();
-                        if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) {
-                            e.consume(); // If user types into a cell anything other than
-                        }                // a number or backspace, ignore
-                    }                    // (AI helped me with this keyListener)
+                        if ((c < '1' || c > '9') && c != KeyEvent.VK_BACK_SPACE) { // If not 1-9 don't type
+                            e.consume();
+                        } else {
+                            editor.setText(c+""); // Take away user input so they cannot type multiple numbers
+                            stopCellEditing();
+                            sudokuBoard.incrementTally(Integer.parseInt(""+c)-1);
+                            System.out.println(sudokuBoard.returnCellTally(Integer.parseInt(""+c)-1));
+                        }
+                    }
                 });
                 // Makes the cell currently being edited have slightly thicker borders
                 editor.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, LIGHTER));
