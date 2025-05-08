@@ -3,6 +3,7 @@ import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Objects;
 
 public class SudokUI {
 
@@ -105,6 +106,7 @@ public class SudokUI {
                     case 9:
                         sudokuBoard.incrementTally(8);
                         break;
+                    default:
                 }
             }
         }
@@ -191,10 +193,15 @@ public class SudokUI {
         // same matteBorder created above. To get around this we must recreate the border above and apply it to the
         // cellEditor as well
         g.setDefaultEditor(Object.class, new DefaultCellEditor(new JTextField()) {
+            String cellOldValue = "";
+
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value,
                                                          boolean isSelected, int row, int col) {
+
+                cellOldValue = Objects.toString(value, ""); // cell is either a num or blank
                 JTextField editor = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, col);
+
                 editor.setHorizontalAlignment(0);
                 editor.setBackground(DARK);
                 editor.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
@@ -203,7 +210,6 @@ public class SudokUI {
                 editor.setSelectionColor(LIGHTEST);
                 editor.setSelectedTextColor(DARKER);
                 editor.setFocusable(true);
-
                 for (KeyListener kl : editor.getKeyListeners()) {
                     editor.removeKeyListener(kl); // Without this, the incrementer fires repeatedly
                 }
@@ -211,19 +217,39 @@ public class SudokUI {
                     @Override                               // a number or backspace, ignore
                     public void keyTyped(KeyEvent e) {      // (AI helped me with this keyListener)
                         char c = e.getKeyChar();
-                        if ((c < '1' || c > '9') && c != KeyEvent.VK_BACK_SPACE) { // If not 1-9 don't type
+                        if (c < '1' || c > '9') {
+                            if (c == '\b') { // If not a number but is a backspace
+                                editor.setText(""); // otherwise a backspace character shows
+                                stopCellEditing(); // Overridden
+                            }
                             e.consume();
-                        } else {
-                            editor.setText(c+""); // Take away user input so they cannot type multiple numbers
-                            stopCellEditing();
-                            sudokuBoard.incrementTally(Integer.parseInt(""+c)-1);
-                            System.out.println(sudokuBoard.returnCellTally(Integer.parseInt(""+c)-1));
+                            return;
                         }
+                    // This code can only happen if the above did not
+                    editor.setText(""+c);
+                    stopCellEditing(); // Overridden
                     }
                 });
                 // Makes the cell currently being edited have slightly thicker borders
                 editor.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, LIGHTER));
                 return editor;
+            }
+
+            // Override stopCellEditing() method means I have control over what happens depending on what the user does
+            @Override
+            public boolean stopCellEditing() {
+                String cellNewValue = getCellEditorValue().toString(); // to compare with cellOldValue
+                // If the user clears a cell value that had info in it:
+                if (!cellOldValue.isEmpty() && cellNewValue.isEmpty()) {
+                    sudokuBoard.decrementTally(Integer.parseInt(cellOldValue)-1);//-1's adjust index
+                    System.out.println("decrement fired");
+                // If the user enters a value into an empty cell:
+                } else if (cellOldValue.isEmpty() && !cellNewValue.isEmpty()) {
+                    sudokuBoard.incrementTally(Integer.parseInt(cellNewValue)-1);
+                    System.out.println("increment fired");
+                }
+                // returns new method to editor
+                return super.stopCellEditing();
             }
         });
     }
