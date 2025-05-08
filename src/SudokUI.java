@@ -25,10 +25,9 @@ public class SudokUI {
     public static void main(String[] args) {
         JFrame frame = new JFrame("SudokUI");
         frame.setContentPane(new SudokUI().sudokuPanel);
-        frame.setAlwaysOnTop(true); // For testing so it doesn't go away when clicking off panel
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setBounds(800, 130, 500, 600);
-        frame.setBackground(new Color(144, 224, 239)); // LIGHTER
+        frame.setBackground(new Color(144, 224, 239)); // LIGHTER (scope issue is preventing use of const)
         frame.setResizable(false);
         frame.setVisible(true);
     }
@@ -71,62 +70,32 @@ public class SudokUI {
     }
 
     private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int difficulty, JLabel[] labelArr) {
-        sudokuBoard.removeCellsFromGrid(difficulty);// Hard puzzle generation
-        for (int row = 0; row < 9; row++) { // Iterate through the table, setting the specific cell to the value
-            for (int col = 0; col < 9; col++) { // contained in the solved sudokuBoard at point [row,col]
+        sudokuBoard.removeCellsFromGrid(difficulty);
+        for (int row = 0; row < 9; row++) {             // Iterate through the table, setting the specific cell to the
+            for (int col = 0; col < 9; col++) {         // value contained in the solved sudokuBoard at point [row,col]
                 sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row, col);
-                if (unsolvedBoard[row][col].getValue() == 0) {
-                    sudokuGame.setValueAt("", row, col);// Display as ""
-                }
                 switch (unsolvedBoard[row][col].getValue()) {
-                    case 1:
-                        sudokuBoard.incrementTally(0);
-                        break;
-                    case 2:
-                        sudokuBoard.incrementTally(1);
-                        break;
-                    case 3:
-                        sudokuBoard.incrementTally(2);
-                        break;
-                    case 4:
-                        sudokuBoard.incrementTally(3);
-                        break;
-                    case 5:
-                        sudokuBoard.incrementTally(4);
-                        break;
-                    case 6:
-                        sudokuBoard.incrementTally(5);
-                        break;
-                    case 7:
-                        sudokuBoard.incrementTally(6);
-                        break;
-                    case 8:
-                        sudokuBoard.incrementTally(7);
-                        break;
-                    case 9:
-                        sudokuBoard.incrementTally(8);
-                        break;
-                    default:
+                    case 1:sudokuBoard.incrementTally(0);break;
+                    case 2:sudokuBoard.incrementTally(1);break;
+                    case 3:sudokuBoard.incrementTally(2);break;
+                    case 4:sudokuBoard.incrementTally(3);break;
+                    case 5:sudokuBoard.incrementTally(4);break;
+                    case 6:sudokuBoard.incrementTally(5);break;
+                    case 7:sudokuBoard.incrementTally(6);break;
+                    case 8:sudokuBoard.incrementTally(7);break;
+                    case 9:sudokuBoard.incrementTally(8);break;
+                    case 0:sudokuGame.setValueAt("", row, col);
                 }
             }
         }
 
-        System.out.println("1's "+sudokuBoard.returnCellTally(0));
-        System.out.println("2's "+sudokuBoard.returnCellTally(1));
-        System.out.println("3's "+sudokuBoard.returnCellTally(2));
-        System.out.println("4's "+sudokuBoard.returnCellTally(3));
-        System.out.println("5's "+sudokuBoard.returnCellTally(4));
-        System.out.println("6's "+sudokuBoard.returnCellTally(5));
-        System.out.println("7's "+sudokuBoard.returnCellTally(6));
-        System.out.println("8's "+sudokuBoard.returnCellTally(7));
-        System.out.println("9's "+sudokuBoard.returnCellTally(8));
-        buttonEasy.setVisible(false);   // Remove buttons to make space for info
+        buttonEasy.setVisible(false);   // Hide buttons if any have been clicked
         buttonMed.setVisible(false);
         buttonHard.setVisible(false);
 
         debug.setVisible(true);
         for (JLabel num : labelArr) {
-            num.setVisible(true);  // Show labels once buttons are gone
+            num.setVisible(true);       // Show buttons once buttons have been hidden
         }
 
     }
@@ -150,12 +119,12 @@ public class SudokUI {
             num.setBackground(new Color(0, 119, 182));
             num.setForeground(new Color(3, 4, 94));
             num.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(3, 4, 94)));
-            if (i == 2 || i == 5) {  // This matches the spacing of the 2 vertical subgrid dividers
+            if (i == 2 || i == 5) {  // 2 vertical subgrid dividers from default renderer
                 x += 55;
             } else {
                 x += 53;
             }
-            i++;
+            i++; // move along
             sudokuPanel.add(num);
         }
     }
@@ -164,34 +133,29 @@ public class SudokUI {
         g.setBounds(50, 50, 400, 500);
         g.setRowHeight(50);
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
-        g.setCellSelectionEnabled(false); // This prevents a multiselect rectangle being formed on drag.
-        // ChatGPT helped me with custom GUI renderer here for thicker borders and centered text
-        g.setShowGrid(false); // Disable default grid and gaps or else it will be ugly
-//        g.setIntercellSpacing(new Dimension(0,0));
-        g.setBackground(DARK); // Area around buttons
-        // Applies thick borders every third row/col as well as around the entire board
+        g.setCellSelectionEnabled(false);
+        g.setShowGrid(false);
+        g.setBackground(DARK);
+        // AI helped me with the Table renderer and editor overrides
         g.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                                                            boolean isSelected, boolean hasFocus,
                                                            int row, int col) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-                setHorizontalAlignment(0); // Center text within each cell
+                setHorizontalAlignment(0);
                 setBackground(DARK);
                 setForeground(LIGHTER);
                 // Calculate border thickness
-                int top = (row == 0 ? 4 : 1);               // top and
-                int left = (col == 0 ? 4 : 1);              // left border
+                int top = (row == 0 ? 4 : 1);
+                int left = (col == 0 ? 4 : 1);
                 int bottom = ((row % 3) == 2 ? 4 : 1);      // every 3rd row
-                int right = ((col % 3) == 2 ? 4 : 1);       // every 3rd col */
+                int right = ((col % 3) == 2 ? 4 : 1);       // every 3rd col
                 Border b = BorderFactory.createMatteBorder(top, left, bottom, right, LIGHTER);
                 setBorder(b);
                 return this;
             }
         });
-        // When the user edits a cell to try and enter a number, a JTextField appears which does not share the
-        // same matteBorder created above. To get around this we must recreate the border above and apply it to the
-        // cellEditor as well
         g.setDefaultEditor(Object.class, new DefaultCellEditor(new JTextField()) {
             String cellOldValue = "";
 
@@ -241,18 +205,17 @@ public class SudokUI {
                 String cellNewValue = getCellEditorValue().toString(); // to compare with cellOldValue
                 // If the user clears a cell value that had info in it:
                 if (!cellOldValue.isEmpty() && cellNewValue.isEmpty()) {
-                    sudokuBoard.decrementTally(Integer.parseInt(cellOldValue)-1);//-1's adjust index
+                    sudokuBoard.decrementTally(Integer.parseInt(cellOldValue)-1);
                     labelArr[Integer.parseInt(cellOldValue)-1].setOpaque(false);
-                    labelArr[Integer.parseInt(cellOldValue)-1].setBackground(DARK); //b/fground seem redundant
-                    labelArr[Integer.parseInt(cellOldValue)-1].setForeground(LIGHTER); // but setting opacity
-                    System.out.println("decrement fired");                          // on its own does nothing
+                    labelArr[Integer.parseInt(cellOldValue)-1].setBackground(DARK); // seems redundant but only setting
+                    labelArr[Integer.parseInt(cellOldValue)-1].setForeground(LIGHTER); // opacity here does nothing
                 // If the user enters a value into an empty cell:
                 } else if (cellOldValue.isEmpty() && !cellNewValue.isEmpty()) {
                     sudokuBoard.incrementTally(Integer.parseInt(cellNewValue)-1);
                     if(sudokuBoard.returnCellTally(Integer.parseInt(cellNewValue)-1) == 9) {
                         labelArr[Integer.parseInt(cellNewValue)-1].setOpaque(true);
-//                        labelArr[Integer.parseInt(cellNewValue)-1].setBackground(DARK);
-//                        labelArr[Integer.parseInt(cellNewValue)-1].setForeground(LIGHTER);
+                        labelArr[Integer.parseInt(cellNewValue)-1].setBackground(DARK);
+                        labelArr[Integer.parseInt(cellNewValue)-1].setForeground(LIGHTER);
                     }
                     System.out.println("increment fired");
                 }
@@ -269,9 +232,8 @@ public class SudokUI {
         difficulty.setForeground(new Color(144, 224, 239));
         difficulty.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, new Color(144, 224, 239)));
         difficulty.setFocusPainted(false); // Removes a tiny rectangle around each button's text
-        /* Google search: "mouselistener signature"           Google AI Overview:
-           public void mouseEntered(MouseEvent e): Invoked when the mouse enters a component.
-           public void mouseExited(MouseEvent e): Invoked when the mouse exits a component.                           */
+        /* public void mouseEntered(MouseEvent e): Invoked when the mouse enters a component.
+           public void mouseExited(MouseEvent e): Invoked when the mouse exits a component.  */
         difficulty.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) { // Hover events
