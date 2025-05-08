@@ -47,10 +47,24 @@ public class SudokUI {
         sudokuGame = new JTable(9, 9);
         designGame(sudokuGame, sudokuBoard);
 
-        buttonEasy = new JButton("EASY");   designButtons(buttonEasy, 0);
-        buttonMed = new JButton("MEDIUM");  designButtons(buttonMed, 162);
-        buttonHard = new JButton("HARD");   designButtons(buttonHard, 323);
+        initButtons();
+        initLabels();
 
+        buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr, labelTimer, labelDifficulty, "Easy"));
+        buttonMed.addActionListener( _ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr, labelTimer, labelDifficulty, "Medium"));
+        buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr, labelTimer, labelDifficulty, "Hard"));
+    }
+
+    private void initButtons() {
+        buttonEasy = new JButton("EASY");
+        buttonMed = new JButton("MEDIUM");
+        buttonHard = new JButton("HARD");
+        designButtons(buttonEasy, 0);
+        designButtons(buttonMed, 162);
+        designButtons(buttonHard, 323);
+    }
+
+    private void initLabels() {
         labelArr = new JLabel[9];
         labelTimer = new JLabel("Time Elapsed 00:00", SwingConstants.CENTER);
         labelDifficulty = new JLabel("", SwingConstants.CENTER);
@@ -64,10 +78,6 @@ public class SudokUI {
                 designLabels(labelArr);
             }
         }
-
-        buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr, labelTimer, labelDifficulty, "Easy"));
-        buttonMed.addActionListener( _ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr, labelTimer, labelDifficulty, "Medium"));
-        buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr, labelTimer, labelDifficulty, "Hard"));
     }
 
     private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int intDifficulty, JLabel[] labelA, JLabel labelT, JLabel labelD, String strDifficulty) {
