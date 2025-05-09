@@ -6,7 +6,6 @@ import java.awt.event.*;
 import java.util.Objects;
 
 public class SudokUI {
-
     private final Color DARKER = new Color(3, 4, 94);
     private final Color DARK = new Color(0, 119, 182);
     private final Color LIGHTER = new Color(144, 224, 239);
@@ -40,12 +39,27 @@ public class SudokUI {
     private void startPuzzle() {
         SudokuBoardWithCells sudokuBoard = new SudokuBoardWithCells();
         Cell[][] unsolvedBoard = sudokuBoard.getPuzzleUnsolved();
-        initGame(sudokuBoard);
+        initGame();
         initButtons();
         initLabels();
-        buttonEasy.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 30, labelArr, labelTimer, labelDifficulty, "Easy"));
-        buttonMed.addActionListener( _ -> startInfo(sudokuBoard, unsolvedBoard, 40, labelArr, labelTimer, labelDifficulty, "Medium"));
-        buttonHard.addActionListener(_ -> startInfo(sudokuBoard, unsolvedBoard, 50, labelArr, labelTimer, labelDifficulty, "Hard"));
+        buttonEasy.addActionListener(_ -> {
+            buttonEasy.setVisible(false);
+            buttonMed.setVisible(false);
+            buttonHard.setVisible(false);
+            startInfo(sudokuBoard, unsolvedBoard, 30, labelArr, labelTimer, labelDifficulty, "Easy");
+        });
+        buttonMed.addActionListener( _ -> {
+            buttonEasy.setVisible(false);
+            buttonMed.setVisible(false);
+            buttonHard.setVisible(false);
+            startInfo(sudokuBoard, unsolvedBoard, 40, labelArr, labelTimer, labelDifficulty, "Medium");
+        });
+        buttonHard.addActionListener(_ -> {
+            buttonEasy.setVisible(false);
+            buttonMed.setVisible(false);
+            buttonHard.setVisible(false);
+            startInfo(sudokuBoard, unsolvedBoard, 50, labelArr, labelTimer, labelDifficulty, "Hard");
+        });
     }
 
     private void startInfo(SudokuBoardWithCells sudokuBoard, Cell[][] unsolvedBoard, int intDifficulty, JLabel[] labelA, JLabel labelT, JLabel labelD, String strDifficulty) {
@@ -54,32 +68,51 @@ public class SudokUI {
             for (int col = 0; col < 9; col++) {         // value contained in the solved sudokuBoard at point [row,col]
                 sudokuGame.setValueAt(unsolvedBoard[row][col].getValue(), row, col);
                 switch (unsolvedBoard[row][col].getValue()) {
-                    case 1:sudokuBoard.incrementTally(0);break;
-                    case 2:sudokuBoard.incrementTally(1);break;
-                    case 3:sudokuBoard.incrementTally(2);break;
-                    case 4:sudokuBoard.incrementTally(3);break;
-                    case 5:sudokuBoard.incrementTally(4);break;
-                    case 6:sudokuBoard.incrementTally(5);break;
-                    case 7:sudokuBoard.incrementTally(6);break;
-                    case 8:sudokuBoard.incrementTally(7);break;
-                    case 9:sudokuBoard.incrementTally(8);break;
+                    case 1: // Use the tally tied to the class
+                        SudokuBoardWithCells.incrementTally(0);
+                        break;
+                    case 2:
+                        SudokuBoardWithCells.incrementTally(1);
+                        break;
+                    case 3:
+                        SudokuBoardWithCells.incrementTally(2);
+                        break;
+                    case 4:
+                        SudokuBoardWithCells.incrementTally(3);
+                        break;
+                    case 5:
+                        SudokuBoardWithCells.incrementTally(4);
+                        break;
+                    case 6:
+                        SudokuBoardWithCells.incrementTally(5);
+                        break;
+                    case 7:
+                        SudokuBoardWithCells.incrementTally(6);
+                        break;
+                    case 8:
+                        SudokuBoardWithCells.incrementTally(7);
+                        break;
+                    case 9:
+                        SudokuBoardWithCells.incrementTally(8);
+                        break;
                     case 0:sudokuGame.setValueAt("", row, col);
                 }
             }
         }
 
-        buttonEasy.setVisible(false);   // Hide buttons if any have been clicked
-        buttonMed.setVisible(false);
-        buttonHard.setVisible(false);
-
         for (int i = 0; i < labelA.length; i++) {
-             labelA[i].setVisible(true); // Now that buttons are hidden set info visible
-             if (i == labelA.length - 1) {
-                 labelD.setVisible(true); // For non array labels, just call once
-                 labelD.setText("Playing: " + strDifficulty);
-                 labelT.setVisible(true);
-                 initTimer(labelT);
-             }
+            labelA[i].setVisible(true);
+            if(SudokuBoardWithCells.returnCellTally(i) == 9) {
+                labelA[i].setOpaque(true); // If 9 of a number are filled upon generation,
+                labelA[i].setBackground(DARK); // set the same visual cue that occurs when
+                labelA[i].setForeground(LIGHTER); // stopCellEditing() clears a number
+            }
+            if (i == labelA.length - 1) {
+                labelD.setVisible(true); // For non array labels, just call once
+                labelD.setText("Playing: " + strDifficulty);
+                labelT.setVisible(true);
+                initTimer(labelT);
+            }
         }
     }
 
@@ -151,14 +184,18 @@ public class SudokUI {
         }
     }
 
-    private void designGame(JTable g, SudokuBoardWithCells sudokuBoard) {
+    private void designGame(JTable g) {
         g.setBounds(50, 50, 400, 500);
         g.setRowHeight(50);
         g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 25));
         g.setCellSelectionEnabled(false);
         g.setShowGrid(false);
         g.setBackground(DARK);
-        // AI helped me with the Table renderer and editor overrides
+        applyRenderer(g);
+        applyEditor(g);
+    }
+
+    private void applyRenderer(JTable g) {
         g.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
@@ -178,10 +215,11 @@ public class SudokUI {
                 return this;
             }
         });
+    }
 
+    private void applyEditor(JTable g) {
         g.setDefaultEditor(Object.class, new DefaultCellEditor(new JTextField()) {
             String cellOldValue = "";
-
             @Override
             public Component getTableCellEditorComponent(JTable table, Object value,
                                                          boolean isSelected, int row, int col) {
@@ -227,33 +265,33 @@ public class SudokUI {
                 String cellNewValue = getCellEditorValue().toString(); // to compare with cellOldValue
                 // If the user clears a cell value that had info in it:
                 if (!cellOldValue.isEmpty() && cellNewValue.isEmpty()) {
-                    sudokuBoard.decrementTally(Integer.parseInt(cellOldValue)-1);
+                    SudokuBoardWithCells.decrementTally(Integer.parseInt(cellOldValue)-1);
                     labelArr[Integer.parseInt(cellOldValue)-1].setOpaque(false);
                     labelArr[Integer.parseInt(cellOldValue)-1].setBackground(DARK); // seems redundant but only setting
                     labelArr[Integer.parseInt(cellOldValue)-1].setForeground(LIGHTER); // opacity here does nothing
                 // If the user enters a value into an empty cell:
                 } else if (cellOldValue.isEmpty() && !cellNewValue.isEmpty()) {
-                    sudokuBoard.incrementTally(Integer.parseInt(cellNewValue)-1);
-                    if(sudokuBoard.returnCellTally(Integer.parseInt(cellNewValue)-1) == 9) {
+                    SudokuBoardWithCells.incrementTally(Integer.parseInt(cellNewValue)-1);
+                    if(SudokuBoardWithCells.returnCellTally(Integer.parseInt(cellNewValue)-1) == 9) {
                         labelArr[Integer.parseInt(cellNewValue)-1].setOpaque(true);
                         labelArr[Integer.parseInt(cellNewValue)-1].setBackground(DARK);
                         labelArr[Integer.parseInt(cellNewValue)-1].setForeground(LIGHTER);
                     }
-                    System.out.println("increment fired");
                 }
-                // returns new method to editor
                 return super.stopCellEditing();
             }
         });
     }
 
-    private void initGame(SudokuBoardWithCells sB) {
+    private void initGame() {
         sudokuPanel = new JPanel(null);
         sudokuPanel.setBackground(DARK);
 
         sudokuGame = new JTable(9, 9);
-        designGame(sudokuGame, sB);
+        designGame(sudokuGame);
     }
+
+
     private void designButtons(JButton difficulty, int x) {
         difficulty.setBounds(x, 475, 160, 65);
         difficulty.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 16));

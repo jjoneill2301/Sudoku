@@ -4,7 +4,7 @@ public class SudokuBoardWithCells extends Cell {
     private final Cell[][] puzzleSolved = new Cell[9][9];    // 2d array of Cell objects for the finished puzzle
     private final Cell[][] puzzleUnsolved = new Cell[9][9];  // 2d array of Cell objects for the puzzle
 
-    private final int[] perCellTally = new int[9];
+    private static final int[] perCellTally = new int[9];
 
     public SudokuBoardWithCells() {
         super(0, 0); // Constructor from super. Necessary or compiler will not like it
@@ -53,15 +53,15 @@ public class SudokuBoardWithCells extends Cell {
         }
     }
 
-    public void incrementTally(int i) {
+    public static void incrementTally(int i) {
         perCellTally[i]++;
     }
 
-    public void decrementTally(int i) {
+    public static void decrementTally(int i) {
         perCellTally[i]--;
     }
 
-    public int returnCellTally(int i) {
+    public static int returnCellTally(int i) {
         return perCellTally[i];
     }
 
